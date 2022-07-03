@@ -11,30 +11,32 @@ import networkx as nx
 
 def generate_path(start_pos,safety_distance):
     # Read in obstacle map
-    print("Reading data ...")
-    data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=2)
     print("Loading colliders data ...")
+    data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=2)
     sampler = Sampler(data,safety_distance)
-    print("Polygons ...")
     polygons = sampler._polygons
-    print("Finding goal ...")
-    goal_rnd=[]
-    while len(goal_rnd)==0:
-        goal_rnd = sampler.sample(1)
-    goal_pos=goal_rnd[0]
     
-    print('Starting position: {0} \nGoal position {1}'.format(start_pos, goal_rnd))
-
     #reading graph
     print("Reading graph ...")
     g=nx.read_gpickle("graph.gpickle")
     
     
+    print("Finding goal ...")
+    goal_pos_graph=None
+    while goal_pos_graph==None:
+        goal_rnd=[]
+        while len(goal_rnd)==0:
+            goal_rnd = sampler.sample(1)
+        goal_pos=goal_rnd[0]
+        goal_pos_graph=closest_neighbor(g,goal_pos,polygons)
+
     #Finding closest node to start and goal positions
-    print("start position neighbor ...")
+    print("Finding closest node to start position ...")
     start_pos_graph=closest_neighbor(g,start_pos,polygons)
-    print("goal position neighbor ...")
-    goal_pos_graph=closest_neighbor(g,goal_pos,polygons)
+    if start_pos_graph==None:
+        return [0,0,0,0] #not path found from start location
+    
+    print('Starting position: {0} \nGoal position {1}'.format(start_pos, goal_rnd))        
     
     #finding collision free path
     print("Finding path ...")
