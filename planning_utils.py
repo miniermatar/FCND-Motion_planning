@@ -5,61 +5,51 @@ import numpy.linalg as LA
 from sklearn.neighbors import KDTree
 from shapely.geometry import Polygon, Point, LineString
 from sampling import Sampler
-
-import sys
-import subprocess #as recommended at: https://www.activestate.com/resources/quick-reads/how-to-install-python-packages-using-a-script/
-
-# implement pip as a subprocess:
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-I', 'networkx==2.1'])
-
-# process output with an API in the subprocess module:
-reqs = subprocess.check_output([sys.executable, '-m', 'pip',
-'freeze'])
-installed_packages = [r.decode().split('==')[0] for r in reqs.split()]
-
 import networkx as nx
 
 
 
 def generate_path(start_pos,safety_distance):
     # Read in obstacle map
+    print("Reading data ...")
     data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=2)
-    #north_min = np.floor(np.min(data[:, 0] - data[:, 3]))
-    #east_min = np.floor(np.min(data[:, 1] - data[:, 4]))
+    print("Loading colliders data ...")
     sampler = Sampler(data,safety_distance)
+    print("Polygons ...")
     polygons = sampler._polygons
+    print("Finding goal ...")
     goal_rnd=[]
     while len(goal_rnd)==0:
         goal_rnd = sampler.sample(1)
     goal_pos=goal_rnd[0]
-    print('Starting position: {0}, Goal position {1}'.format(start_pos, goal_rnd))
-    load_graph=True
-    if load_graph==True:
-        g=nx.read_gpickle("graph.gpickle")
-    else:
-        nodes = sampler.sample(500)
-        print("Numbers of nodes: {}".format(len(nodes)))
-        import time
-        t0 = time.time()
-        g = create_graph(nodes, 10, polygons)
-        print('graph took {0} seconds to build'.format(time.time()-t0))
     
-    print("Number of edges")
+    print('Starting position: {0} \nGoal position {1}'.format(start_pos, goal_rnd))
+
+    #reading graph
+    print("Reading graph ...")
+    g=nx.read_gpickle("graph.gpickle")
+    
+    
+    #Finding closest node to start and goal positions
+    print("start position neighbor ...")
     start_pos_graph=closest_neighbor(g,start_pos,polygons)
-   # if can_connect(start_pos_graph, start_pos, polygons):
-    #    print ("Start connected")
+    print("goal position neighbor ...")
     goal_pos_graph=closest_neighbor(g,goal_pos,polygons)
- #   if can_connect(goal_pos_graph, goal_pos, polygons):
-  #      print ("Goal connected")
+    
+    #finding collision free path
+    print("Finding path ...")
     path, cost = a_star(g, heuristic, start_pos_graph, goal_pos_graph)
     path.append(goal_pos)
     
-   
+    #creating waypoints
     waypoints = [[int(p[0]),int(p[1]),int(p[2]), 0] for p in path]
+    
+    #calculating yaw angle to be sent with waypoint
     for i in range(0,len(waypoints)-1,1):
         waypoints[i+1][3]=np.arctan2((waypoints[i+1][1]-waypoints[i][1]), (waypoints[i+1][0]-waypoints[i][0]))
-    #waypoints_simulator = [[int(p[0] - north_min), int(p[1] - east_min), p[2], 0] for p in path]
+    
     print(len(waypoints), waypoints)
+    
     return waypoints
 
 
@@ -98,7 +88,7 @@ def create_graph(nodes, k, polygons):
 def closest_neighbor(graph,point,polygons):
     #ientifying closest point in the graph from start and goal
     closest_neighbor=None
-    distance=100
+    distance=150
     for coordinate in graph.nodes:
         dist=LA.norm(np.array(coordinate) - np.array(point))
         if dist < distance:
