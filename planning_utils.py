@@ -88,7 +88,7 @@ def create_graph(nodes, k, polygons):
 def closest_neighbor(graph,point,polygons):
     #ientifying closest point in the graph from start and goal
     closest_neighbor=None
-    distance=150
+    distance=200
     for coordinate in graph.nodes:
         dist=LA.norm(np.array(coordinate) - np.array(point))
         if dist < distance:

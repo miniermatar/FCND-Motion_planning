@@ -54,7 +54,7 @@ class MotionPlanning(Drone):
 
     def velocity_callback(self):
         if self.flight_state == States.LANDING:
-            if np.linalg.norm(self.local_velocity[0:2]) < 0.2:
+            if np.linalg.norm(self.local_velocity[0:2]) < 0.05:
                 self.disarming_transition()
 
     def state_callback(self):
@@ -92,6 +92,7 @@ class MotionPlanning(Drone):
         self.flight_state = States.LANDING
         print("landing transition")
         self.land()
+        time.sleep(2) # 2 seconds delay to start landing and reading velocity
 
     def disarming_transition(self):
         self.flight_state = States.DISARMING

@@ -51,6 +51,7 @@ sampler = Sampler(data,safety_distance)
 polygons = sampler._polygons
 nodes = sampler.sample(1000)
 print("Numbers of nodes: {}".format(len(nodes)))
+print("Generating graph ...")
 import time
 t0 = time.time()
 g = create_graph(nodes, 10, polygons)
