@@ -11,17 +11,17 @@ import networkx as nx
 
 def generate_path(start_pos,safety_distance):
     # Read in obstacle map
-    print("Loading colliders data ...")
+    print("\tLoading colliders data ...")
     data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=2)
     sampler = Sampler(data,safety_distance)
     polygons = sampler._polygons
     
     #reading graph
-    print("Reading graph ...")
+    print("\tReading graph ...")
     g=nx.read_gpickle("graph.gpickle")
     
     
-    print("Finding goal ...")
+    print("\tFinding goal ...")
     goal_pos_graph=None
     while goal_pos_graph==None:
         goal_rnd=[]
@@ -31,15 +31,15 @@ def generate_path(start_pos,safety_distance):
         goal_pos_graph=closest_neighbor(g,goal_pos,polygons)
 
     #Finding closest node to start and goal positions
-    print("Finding closest node to start position ...")
-    start_pos_graph=closest_neighbor(g,start_pos,polygons)
+    print("\tFinding closest node to start position ...")
+    start_pos_graph=closest_neighbor_start(g,start_pos,polygons)
     if start_pos_graph==None:
         return [0,0,0,0] #not path found from start location
     
     print('Starting position: {0} \nGoal position {1}'.format(start_pos, goal_rnd))        
     
     #finding collision free path
-    print("Finding path ...")
+  
     path, cost = a_star(g, heuristic, start_pos_graph, goal_pos_graph)
     path.append(goal_pos)
     
@@ -55,15 +55,6 @@ def generate_path(start_pos,safety_distance):
     return waypoints
 
 
-"""python
-# Define two waypoints with heading = 0 for both
-wp1 = [n1, e1, a1, 0]
-wp2 = [n2, e2, a2, 0]
-# Set heading of wp2 based on relative position to wp1
-wp2[3] = np.arctan2((wp2[1]-wp1[1]), (wp2[0]-wp1[0]))
-"""
-
-
 def can_connect(n1, n2,polygons):
     l = LineString([n1, n2])
     for p in polygons:
@@ -71,21 +62,6 @@ def can_connect(n1, n2,polygons):
             return False
     return True
 
-def create_graph(nodes, k, polygons):
-    g = nx.Graph()
-    tree = KDTree(nodes)
-    for n1 in nodes:
-        # for each node connect try to connect to k nearest nodes
-        idxs = tree.query([n1], k, return_distance=False)[0]
-        
-        for idx in idxs:
-            n2 = nodes[idx]
-            if n2 == n1:
-                continue
-                
-            if can_connect(n1, n2, polygons):
-                g.add_edge(n1, n2, weight=1)
-    return g
 
 def closest_neighbor(graph,point,polygons):
     #ientifying closest point in the graph from start and goal
@@ -98,6 +74,25 @@ def closest_neighbor(graph,point,polygons):
                 closest_neighbor=coordinate
                 distance=dist
     return closest_neighbor
+
+def can_connect_start(n1, n2,polygons):
+    l = LineString([n1, n2])
+    for p in polygons:
+        if p.crosses(l) and p.height >= n1[2]:
+            return False
+    return True
+
+def closest_neighbor_start(graph,point,polygons):
+    #ientifying closest point in the graph from start and goal
+    closest_neighbor_start=None
+    distance=200
+    for coordinate in graph.nodes:
+        dist=LA.norm(np.array(coordinate) - np.array(point))
+        if dist < distance:
+            if can_connect_start(coordinate, point, polygons):
+                closest_neighbor_start=coordinate
+                distance=dist
+    return closest_neighbor_start
     
     
 
