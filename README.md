@@ -12,7 +12,7 @@ Clone this repository:
 git clone https://github.com/miniermatar/FCND-Motion_planning
 ```
 
-This motion planning project is based on probabilistic roadmap. For simplicity, a 3D graph of the environment have been created and safe as a gpickle file. To run the motion planning process with the pre-created graph, run the following script:
+This motion planning project is based on probabilistic roadmap. For simplicity, a 3D graph of the environment have been created and saved as a gpickle file. To run the motion planning process with the pre-created graph, run the following script:
 ```sh
 python motion_planning.py
 ```
@@ -20,6 +20,7 @@ python motion_planning.py
 Please note that the Udacity simulator has an unexpected obsticle at startup, the drone should be moved to a different location before running the motion planning script. More details on the issue in the links below:
 
 https://github.com/udacity/fcnd-issue-reports/issues/392
+
 https://knowledge.udacity.com/questions/846330
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/1534/view) Points
@@ -37,7 +38,7 @@ The code provided calculate a path from a specific location (center of the grid)
 
 ### Implementing Your Path Planning Algorithm
 #### 1. Set your global home position
-The global position was read from the colliders.csv file and the coordinates were extracted using the re library as shown below:
+The global position was read from the colliders.csv file and the coordinates were extracted using the `re` library as shown below:
 ```sh
         f_line= open("colliders.csv", "r")
         start_loc = re.findall("[-\d]+\.\d+",f_line.readline())
@@ -48,7 +49,7 @@ The global position was read from the colliders.csv file and the coordinates wer
 ```
 
 #### 2. Set your current local position
-The local position of the drone was determined using the global_to_local function from the Udacidrone API as shown below:
+The local position of the drone was determined using the `global_to_local` function from the Udacidrone API as shown below:
 ```sh
 north,east,down = global_to_local(self.global_position, self.global_home)
 ```
