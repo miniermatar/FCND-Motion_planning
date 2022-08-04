@@ -185,7 +185,6 @@ def valid_actions(grid, current_node):
 def a_star(graph, heuristic, start, goal):
     """Modified A* to work with NetworkX graphs."""
     
-    # TODO: complete
 
     path = []
     queue = PriorityQueue()

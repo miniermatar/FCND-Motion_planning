@@ -126,7 +126,7 @@ class MotionPlanning(Drone):
         self.set_home_position(lon,lat,0)  
 
         north,east,down = global_to_local(self.global_position, self.global_home)
-        print('global home {0}, \nposition {1}, \nlocal position {2}'.format(self.global_home, self.global_position,                self.local_position))
+        print('global home {0}, \nglobal position {1}, \nlocal position {2}'.format(self.global_home, self.global_position,                self.local_position))
     
         start = north,east,down 
         #Target altiture is 5 m above current position. In case drone is on top of a building

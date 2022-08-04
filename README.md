@@ -1,88 +1,130 @@
-# FCND - 3D Motion Planning
-![Quad Image](./misc/enroute.png)
+## Project: 3D Motion Planning
+![Quad Image](./images/drone_in_the_air.png)
+This project is part of Udacity flying car nanodegree program focused on 3D motion planning. To execute the project, download the Udacity simulator version v0.1.1 from the following link: https://github.com/udacity/FCND-Simulator-Releases/releases
 
-
-
-This project is a continuation of the Backyard Flyer project where you executed a simple square shaped flight path. In this project you will integrate the techniques that you have learned throughout the last several lessons to plan a path through an urban environment. Check out the [project rubric](https://review.udacity.com/#!/rubrics/1534/view) for more detail on what constitutes a passing submission.
-
-## Option to do this project in a GPU backed virtual machine in the Udacity classroom!
-Rather than downloading the simulator and starter files you can simply complete this project in a virual workspace in the Udacity classroom! Follow [these instructions](https://classroom.udacity.com/nanodegrees/nd787/parts/5aa0a956-4418-4a41-846f-cb7ea63349b3/modules/0c12632a-b59a-41c1-9694-2b3508f47ce7/lessons/5f628104-5857-4a3f-93f0-d8a53fe6a8fd/concepts/ab09b378-f85f-49f4-8845-d59025dd8a8e?contentVersion=1.0.0&contentLocale=en-us) to proceed with the VM. 
-
-## To complete this project on your local machine, follow these instructions:
-### Step 1: Download the Simulator
-This is a new simulator environment!  
-
-Download the Motion-Planning simulator for this project that's appropriate for your operating system from the [simulator releases respository](https://github.com/udacity/FCND-Simulator-Releases/releases).
-
-### Step 2: Set up your Python Environment
-If you haven't already, set up your Python environment and get all the relevant packages installed using Anaconda following instructions in [this repository](https://github.com/udacity/FCND-Term1-Starter-Kit)
-
-### Step 3: Clone this Repository
+If Miniconda is not installed, install miniconda ([miniconda official site](https://docs.conda.io/en/latest/miniconda.html)) and set up the Python environment using the environment.yml file as below. This step could take up to 20 min.
 ```sh
-git clone https://github.com/udacity/FCND-Motion-Planning
+conda env create -f environment.yml
 ```
-### Step 4: Test setup
-The first task in this project is to test the [solution code](https://github.com/udacity/FCND-Motion-Planning/blob/master/backyard_flyer_solution.py) for the Backyard Flyer project in this new simulator. Verify that your Backyard Flyer solution code works as expected and your drone can perform the square flight path in the new simulator. To do this, start the simulator and run the [`backyard_flyer_solution.py`](https://github.com/udacity/FCND-Motion-Planning/blob/master/backyard_flyer_solution.py) script.
 
+Clone this repository:
 ```sh
-source activate fcnd # if you haven't already sourced your Python environment, do so now.
-python backyard_flyer_solution.py
+git clone https://github.com/miniermatar/FCND-Motion_planning
 ```
-The quad should take off, fly a square pattern and land, just as in the previous project. If everything functions as expected then you are ready to start work on this project. 
 
-### Step 5: Inspect the relevant files
-For this project, you are provided with two scripts, `motion_planning.py` and `planning_utils.py`. Here you'll also find a file called `colliders.csv`, which contains the 2.5D map of the simulator environment. 
-
-### Step 6: Explain what's going on in  `motion_planning.py` and `planning_utils.py`
-
-`motion_planning.py` is basically a modified version of `backyard_flyer.py` that leverages some extra functions in `planning_utils.py`. It should work right out of the box.  Try running `motion_planning.py` to see what it does. To do this, first start up the simulator, then at the command line:
- 
+This motion planning project is based on probabilistic roadmap. For simplicity, a 3D graph of the environment have been created and safe as a gpickle file. To run the motion planning process with the pre-created graph, run the following script:
 ```sh
-source activate fcnd # if you haven't already sourced your Python environment, do so now.
 python motion_planning.py
 ```
 
-You should see the quad fly a jerky path of waypoints to the northeast for about 10 m then land.  What's going on here? Your first task in this project is to explain what's different about `motion_planning.py` from the `backyard_flyer_solution.py` script, and how the functions provided in `planning_utils.py` work. 
+Please note that the Udacity simulator has an unexpected obsticle at startup, the drone should be moved to a different location before running the motion planning script. More details on the issue in the links below:
 
-### Step 7: Write your planner
+https://github.com/udacity/fcnd-issue-reports/issues/392
+https://knowledge.udacity.com/questions/846330
 
-Your planning algorithm is going to look something like the following:
+## [Rubric](https://review.udacity.com/#!/rubrics/1534/view) Points
 
-- Load the 2.5D map in the `colliders.csv` file describing the environment.
-- Discretize the environment into a grid or graph representation.
-- Define the start and goal locations. You can determine your home location from `self._latitude` and `self._longitude`. 
-- Perform a search using A* or other search algorithm. 
-- Use a collinearity test or ray tracing method (like Bresenham) to remove unnecessary waypoints.
-- Return waypoints in local ECEF coordinates (format for `self.all_waypoints` is [N, E, altitude, heading], where the drone’s start location corresponds to [0, 0, 0, 0]). 
+### Below i will explain how I addressed each point of the rubric in my implementation.  
 
-Some of these steps are already implemented for you and some you need to modify or implement yourself.  See the [rubric](https://review.udacity.com/#!/rubrics/1534/view) for specifics on what you need to modify or implement.
+### Writeup / README
 
-### Step 8: Write it up!
-When you're finished, complete a detailed writeup of your solution and discuss how you addressed each step. You can use the [`writeup_template.md`](./writeup_template.md) provided here or choose a different format, just be sure to describe clearly the steps you took and code you used to address each point in the [rubric](https://review.udacity.com/#!/rubrics/1534/view). And have fun!
+#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  
+You're reading it! Below I describe how I addressed each rubric point and where in my code each point is handled.
 
-## Extra Challenges
-The submission requirements for this project are laid out in the rubric, but if you feel inspired to take your project above and beyond, or maybe even keep working on it after you submit, then here are some suggestions for interesting things to try.
+### Explain the Starter Code
+#### 1. Explain the functionality of what's provided in `motion_planning.py` and `planning_utils.py`
+The code provided calculate a path from a specific location (center of the grid) to the goal that is 10 meter north and 10 meter east. It uses the colliders.csv data to create a grid of the city (at a specific altitude) and then run A* to find the path. 
 
-### Try flying more complex trajectories
-In this project, things are set up nicely to fly right-angled trajectories, where you ascend to a particular altitude, fly a path at that fixed altitude, then land vertically. However, you have the capability to send 3D waypoints and in principle you could fly any trajectory you like. Rather than simply setting a target altitude, try sending altitude with each waypoint and set your goal location on top of a building!
-
-### Adjust your deadbands
-Adjust the size of the deadbands around your waypoints, and even try making deadbands a function of velocity. To do this, you can simply modify the logic in the `local_position_callback()` function.
-
-### Add heading commands to your waypoints
-This is a recent update! Make sure you have the [latest version of the simulator](https://github.com/udacity/FCND-Simulator-Releases/releases). In the default setup, you're sending waypoints made up of NED position and heading with heading set to 0 in the default setup. Try passing a unique heading with each waypoint. If, for example, you want to send a heading to point to the next waypoint, it might look like this:
-
-```python
-# Define two waypoints with heading = 0 for both
-wp1 = [n1, e1, a1, 0]
-wp2 = [n2, e2, a2, 0]
-# Set heading of wp2 based on relative position to wp1
-wp2[3] = np.arctan2((wp2[1]-wp1[1]), (wp2[0]-wp1[0]))
+### Implementing Your Path Planning Algorithm
+#### 1. Set your global home position
+The global position was read from the colliders.csv file and the coordinates were extracted using the re library as shown below:
+```sh
+        f_line= open("colliders.csv", "r")
+        start_loc = re.findall("[-\d]+\.\d+",f_line.readline())
+        lat=float(start_loc[0])
+        lon=float(start_loc[1])
+        f_line.close()
+        self.set_home_position(lon,lat,0)  
 ```
 
-This may not be completely intuitive, but this will yield a yaw angle that is positive counterclockwise about a z-axis (down) axis that points downward.
+#### 2. Set your current local position
+The local position of the drone was determined using the global_to_local function from the Udacidrone API as shown below:
+```sh
+north,east,down = global_to_local(self.global_position, self.global_home)
+```
 
-Put all of these together and make up your own crazy paths to fly! Can you fly a double helix?? 
-![Double Helix](./misc/double_helix.gif)
+#### 3. Set grid start position from local position
+The start position is determined as the current position of the drone. It could also be a position on top of a building.
 
-Ok flying a double helix might seem like a silly idea, but imagine you are an autonomous first responder vehicle. You need to first fly to a particular building or location, then fly a reconnaissance pattern to survey the scene! Give it a try!
+#### 4. Set grid goal position from geodetic coords
+The goal position is randomly determined based on a uniform distribution using the sampler function from sampling.py
+```sh
+print("\tFinding goal ...")
+goal_pos_graph=None
+while goal_pos_graph==None:
+    goal_rnd=[]
+    while len(goal_rnd)==0:
+        goal_rnd = sampler.sample(1)
+    goal_pos=goal_rnd[0]
+```
+
+#### 5. Modify A* to include diagonal motion (or replace A* altogether)
+This project uses probabilistic roadmaps to find a free path between start and goal positions. The search is done using the A* algorithm modified to support NetworkX graphs. Since the creating of a graph is a time consuming task (and since the environment where the drone will fly is static), a graph was created once and saved as a gpickle file: `graph.gpickle` and read during runtime. If needed, new map of the environment can be created by running the following script. This will overwrite the existing graph and the process could take up to 5 min.
+```sh
+python generate_graph.py
+```
+The implementation of the A* algorithm can be found in `planning_utils.py` under the `a_star` function.
+
+#### 6. Cull waypoints 
+Since this implementation is based on probabilistic roadmap, cull waypoints was not needed.
+
+### Execute the flight
+#### 1. Does it work?
+It works! Few pictures below:
+![Drone following the path](./images/drone_at_19m_altitute.png)
+
+![Drone in mission](./images/drone_2m.png)
+
+  
+# Extra Challenges: Real World Planning
+Some additional real world challenges were considered and implemented as explained below.
+
+## Waypoint headings:
+As the drone move through the city, it’s yaw angle is updated to match the direction of flight. This was accomplished through code below in `planning_utils.py`:
+```sh
+for i in range(0,len(waypoints)-1,1):
+    waypoints[i+1][3]=np.arctan2((waypoints[i+1][1]-waypoints[i][1]), (waypoints[i+1][0]-waypoints[i][0]))
+```
+Below is a picture of the drone with the same orientation as the path:
+![Drone oreientation](./images/drone_orientation.png)
+
+## Deadband adjustment:
+To allow for a flexible deadband as the drone flight through the different waypoints, the criteria for deciding when to switch waypoints was adjusted based on the drone velocity. That was added in the local position callback. The criteria is that the position should be less than 10* of the drone velocity + 0.2. The addition of the 0.2 is for cases where velocities are close to zero (typically on the last waypoint). Code below:
+```sh
+def local_position_callback(self):
+    if self.flight_state == States.TAKEOFF:
+        if -1.0 * self.local_position[2] > 0.95 * self.target_position[2]:
+            self.waypoint_transition()
+    elif self.flight_state == States.WAYPOINT:
+        #deadband is adjusted based on drone velocity
+        if np.linalg.norm(self.target_position[0:2] - self.local_position[0:2]) < (0.1* np.linalg.norm(self.local_velocity[0:2])+0.2):
+            if len(self.waypoints) > 0:
+                self.waypoint_transition()
+            else:
+                if np.linalg.norm(self.local_velocity[0:2]) < 1.0:
+                    self.landing_transition()
+```
+
+## Landing on top of buildings:
+The code has the ability to land on top of buildings. To achieve that, the local velocity callback will start the disarming process once the drone velocity is less than 0.001 (now, it is not related to the altitude as in the original code). Code below:
+```sh
+def velocity_callback(self):
+    if self.flight_state == States.LANDING:
+        if np.linalg.norm(self.local_velocity[0:2]) < 0.001:
+            self.disarming_transition()
+```
+
+## Take off from the roofs:
+If the drone start position is on top of a building, the take off command will make the drone go 5 meters above its current starting altitude and it will identify the closest node to that position.
+
+
