@@ -58,15 +58,10 @@ north,east,down = global_to_local(self.global_position, self.global_home)
 The start position is determined as the current position of the drone. It could also be a position on top of a building.
 
 #### 4. Set grid goal position from geodetic coords
-The goal position is randomly determined based on a uniform distribution using the sampler function from sampling.py
+The goal position is randomly determined by selection a random point from the graph, as shown below:
 ```sh
 print("\tFinding goal ...")
-goal_pos_graph=None
-while goal_pos_graph==None:
-    goal_rnd=[]
-    while len(goal_rnd)==0:
-        goal_rnd = sampler.sample(1)
-    goal_pos=goal_rnd[0]
+goal_pos_graph=np.random.choice(g.nodes)
 ```
 
 #### 5. Modify A* to include diagonal motion (or replace A* altogether)

@@ -22,14 +22,8 @@ def generate_path(start_pos,safety_distance):
     
     
     print("\tFinding goal ...")
-    goal_pos_graph=None
-    while goal_pos_graph==None:
-        goal_rnd=[]
-        while len(goal_rnd)==0:
-            goal_rnd = sampler.sample(1)
-        goal_pos=goal_rnd[0]
-        goal_pos_graph=closest_neighbor(g,goal_pos,polygons)
-
+    goal_pos_graph=np.random.choice(g.nodes)
+    print("\tgoal: {}".format(goal_pos_graph))
     #Finding closest node to start and goal positions
     print("\tFinding closest node to start position ...")
     start_pos_graph=closest_neighbor_start(g,start_pos,polygons)
@@ -41,8 +35,7 @@ def generate_path(start_pos,safety_distance):
     #finding collision free path
   
     path, cost = a_star(g, heuristic, start_pos_graph, goal_pos_graph)
-    path.append(goal_pos)
-    
+
     #creating waypoints
     waypoints = [[int(p[0]),int(p[1]),int(p[2]), 0] for p in path]
     
