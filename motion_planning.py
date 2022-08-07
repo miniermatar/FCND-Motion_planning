@@ -126,7 +126,7 @@ class MotionPlanning(Drone):
         self.set_home_position(lon,lat,0)  
 
         north,east,down = global_to_local(self.global_position, self.global_home)
-        print('global home {0}, \nglobal position {1}, \nlocal position {2}'.format(self.global_home, self.global_position,                self.local_position))
+        print('global home {0}, \nglobal position {1}, \nlocal position {2}'.format(self.global_home, self.global_position, self.local_position))
     
         start = north,east,down 
         #Target altiture is 5 m above current position. In case drone is on top of a building
@@ -136,7 +136,7 @@ class MotionPlanning(Drone):
         self.target_position[2] = TARGET_ALTITUDE
         
         print("Generating waypoints with headings...")
-        waypoints=generate_path(start,safety_distance)
+        waypoints=generate_path(start,safety_distance,self.global_home)
         if waypoints==[0,0,0,0]:
             print ("\nNo path found from start posistion. Move drone to another location\n")
             self.disarming_transition()
@@ -152,8 +152,8 @@ class MotionPlanning(Drone):
         self.connection.start()
 
         # Only required if they do threaded
-        #while self.in_mission:
-            #pass
+        while self.in_mission:
+            pass
 
         self.stop_log()
 
@@ -164,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument('--host', type=str, default='127.0.0.1', help="host address, i.e. '127.0.0.1'")
     args = parser.parse_args()
 
-    conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port),threaded=False, timeout=3000)
+    conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port),threaded=False, timeout=1000)
     drone = MotionPlanning(conn)
     time.sleep(1)
 

@@ -58,10 +58,20 @@ north,east,down = global_to_local(self.global_position, self.global_home)
 The start position is determined as the current position of the drone. It could also be a position on top of a building.
 
 #### 4. Set grid goal position from geodetic coords
-The goal position is randomly determined by selection a random point from the graph, as shown below:
+The goal position is randomly determined by selecting a random geodetic coordinate and then converting it to local coordinates. The coordinates are checked to ensure they are ithin the boundaries of the provided data, as shown below:
 ```sh
 print("\tFinding goal ...")
-goal_pos_graph=np.random.choice(g.nodes)
+while True:
+    goal_lon=np.random.uniform(-122.40107126,-122.39054357)
+    goal_lat=np.random.uniform(37.78848764,37.79673471)
+
+    goal_pos=np.array([goal_lon,goal_lat,-5]) #altitude set 5 meters above the ground
+    goal_pos_local=global_to_local(goal_pos,global_home)
+
+    if within_boundaries (data,goal_pos_local)==True:
+        goal_pos_graph=closest_neighbor(g,goal_pos_local,polygons)
+        if closest_neighbor(g,goal_pos_local,polygons)!=None:
+            break
 ```
 
 #### 5. Modify A* to include diagonal motion (or replace A* altogether)
